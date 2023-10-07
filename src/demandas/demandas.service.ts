@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { Demandas } from './entities/demandas.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateDemandaDto } from './dto/update-demandas.dto';
+import { CreateDemandaDto } from './dto/create-demandas.dto';
 
 @Injectable()
 export class DemandasService {
@@ -19,7 +20,7 @@ export class DemandasService {
     return await this.demandasRepository.findOne({ where: { id } });
   }
 
-  async create(demandas: Demandas): Promise<Demandas> {
+  async create(demandas: CreateDemandaDto): Promise<Demandas> {
     return await this.demandasRepository.save(demandas);
   }
 

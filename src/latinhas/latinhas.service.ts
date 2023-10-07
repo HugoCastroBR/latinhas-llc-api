@@ -1,26 +1,130 @@
-import { Injectable } from '@nestjs/common';
-import { CreateLatinhaDto } from './dto/create-latinha.dto';
-import { UpdateLatinhaDto } from './dto/update-latinha.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { Latinhas } from './entities/latinhas.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateLatinhasDTO } from './dto/create-latinhas.dto';
+import { UpdateLatinhasDTO } from './dto/update-latinhas.dto';
+import { Demandas } from 'src/demandas/entities/demandas.entity';
 
 @Injectable()
 export class LatinhasService {
-  create(createLatinhaDto: CreateLatinhaDto) {
-    return 'This action adds a new latinha';
+  constructor(
+    @InjectRepository(Latinhas)
+    private latinhasRepository: Repository<Latinhas>,
+    @InjectRepository(Demandas)
+    private demandasRepository: Repository<Demandas>,
+  ) {}
+
+  async findAllByDemanda(demandaId: number): Promise<Latinhas[]> {
+    const demanda = await this.demandasRepository.findOne({
+      where: { id: demandaId },
+      relations: ['latinhas'],
+    });
+    if (!demanda) {
+      throw new NotFoundException(
+        `Demanda com ID ${demandaId} não encontrada.`,
+      );
+    }
+    return demanda.latinhas;
   }
 
-  findAll() {
-    return `This action returns all latinhas`;
+  async findOne(demandaId: number, latinhaId: number): Promise<Latinhas> {
+    const demanda = await this.demandasRepository.findOne({
+      where: { id: demandaId },
+      relations: ['latinhas'],
+    });
+    if (!demanda) {
+      throw new NotFoundException(
+        `Demanda com ID ${demandaId} não encontrada.`,
+      );
+    }
+    const latinha = demanda.latinhas.find((l) => l.id === latinhaId);
+    if (!latinha) {
+      throw new NotFoundException(
+        `Latina com ID ${latinhaId} não encontrada na demanda.`,
+      );
+    }
+    return latinha;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} latinha`;
+  async create(
+    demandaId: number,
+    createLatinhasDTO: CreateLatinhasDTO,
+  ): Promise<Latinhas> {
+    const demanda = await this.demandasRepository.findOne({
+      where: { id: demandaId },
+    });
+    if (!demanda) {
+      throw new NotFoundException(
+        `Demanda com ID ${demandaId} não encontrada.`,
+      );
+    }
+
+    const latinha = new Latinhas();
+    latinha.Sku = createLatinhasDTO.Sku;
+    latinha.descricao = createLatinhasDTO.descricao;
+    latinha.TotalPlan = createLatinhasDTO.TotalPlan;
+    latinha.demanda = demanda;
+
+    return await this.latinhasRepository.save(latinha);
   }
 
-  update(id: number, updateLatinhaDto: UpdateLatinhaDto) {
-    return `This action updates a #${id} latinha`;
+  async update(
+    demandaId: number,
+    latinhaId: number,
+    updateLatinhasDTO: UpdateLatinhasDTO,
+  ): Promise<Latinhas> {
+    const demanda = await this.demandasRepository.findOne({
+      where: { id: demandaId },
+      relations: ['latinhas'],
+    });
+    if (!demanda) {
+      throw new NotFoundException(
+        `Demanda com ID ${demandaId} não encontrada.`,
+      );
+    }
+
+    const latinha = demanda.latinhas.find((l) => l.id === latinhaId);
+    if (!latinha) {
+      throw new NotFoundException(
+        `Latina com ID ${latinhaId} não encontrada na demanda.`,
+      );
+    }
+
+    if (updateLatinhasDTO.Sku) {
+      latinha.Sku = updateLatinhasDTO.Sku;
+    }
+
+    if (updateLatinhasDTO.descricao) {
+      latinha.descricao = updateLatinhasDTO.descricao;
+    }
+
+    if (updateLatinhasDTO.TotalPlan) {
+      latinha.TotalPlan = updateLatinhasDTO.TotalPlan;
+    }
+
+    await this.latinhasRepository.save(latinha);
+    return latinha;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} latinha`;
+  async delete(demandaId: number, latinhaId: number): Promise<void> {
+    const demanda = await this.demandasRepository.findOne({
+      where: { id: demandaId },
+      relations: ['latinhas'],
+    });
+    if (!demanda) {
+      throw new NotFoundException(
+        `Demanda com ID ${demandaId} não encontrada.`,
+      );
+    }
+
+    const latinha = demanda.latinhas.find((l) => l.id === latinhaId);
+    if (!latinha) {
+      throw new NotFoundException(
+        `Latina com ID ${latinhaId} não encontrada na demanda.`,
+      );
+    }
+
+    await this.latinhasRepository.remove(latinha);
   }
 }

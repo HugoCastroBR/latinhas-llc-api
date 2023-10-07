@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Latinhas } from '../../latinhas/entities/latinhas.entity';
 @Entity()
 export class Demandas {
   @PrimaryGeneratedColumn()
@@ -19,4 +19,7 @@ export class Demandas {
 
   @Column()
   status: string;
+
+  @OneToMany(() => Latinhas, (latinhas) => latinhas.demanda)
+  latinhas: Latinhas[];
 }
