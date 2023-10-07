@@ -7,12 +7,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { Demandas } from './entities/demandas.entity';
 import { DemandasService } from './demandas.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateDemandaDto } from './dto/create-demandas.dto';
 import { UpdateDemandaDto } from './dto/update-demandas.dto';
+import { PaginationDTO } from './dto/pagination.dto';
 
 @ApiTags('demandas')
 @Controller('demandas')
@@ -20,8 +22,8 @@ export class DemandasController {
   constructor(private readonly demandasService: DemandasService) {}
 
   @Get()
-  async findAll(): Promise<Demandas[]> {
-    return this.demandasService.findAll();
+  findAll(@Query() pagination: PaginationDTO) {
+    return this.demandasService.findAll(pagination);
   }
 
   @Get(':id')

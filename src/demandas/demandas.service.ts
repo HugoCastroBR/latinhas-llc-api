@@ -4,6 +4,7 @@ import { Demandas } from './entities/demandas.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateDemandaDto } from './dto/update-demandas.dto';
 import { CreateDemandaDto } from './dto/create-demandas.dto';
+import { PaginationDTO } from './dto/pagination.dto';
 
 @Injectable()
 export class DemandasService {
@@ -12,8 +13,27 @@ export class DemandasService {
     private demandasRepository: Repository<Demandas>,
   ) {}
 
-  async findAll(): Promise<Demandas[]> {
-    return await this.demandasRepository.find();
+  async findAll(pagination: PaginationDTO): Promise<any> {
+    const { page, itemsPerPage } = pagination;
+    const skip = (page - 1) * itemsPerPage;
+
+    const [demandas, total] = await this.demandasRepository.findAndCount({
+      relations: ['latinhas'],
+      skip,
+      take: itemsPerPage,
+    });
+
+    const demandasWithCount = demandas.map((demanda) => ({
+      id: demanda.id,
+      dataInicio: demanda.dataInicio,
+      dataFim: demanda.dataFim,
+      totalPlan: demanda.totalPlan,
+      totalProd: demanda.totalProd,
+      status: demanda.status,
+      SKUs: demanda.latinhas.length,
+    }));
+
+    return { demandas: demandasWithCount, total };
   }
 
   async findOne(id: number): Promise<Demandas> {

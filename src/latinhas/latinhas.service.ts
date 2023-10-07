@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateLatinhasDTO } from './dto/create-latinhas.dto';
 import { UpdateLatinhasDTO } from './dto/update-latinhas.dto';
 import { Demandas } from 'src/demandas/entities/demandas.entity';
+import { PaginationDTO } from './dto/pagination.dto';
 
 @Injectable()
 export class LatinhasService {
@@ -14,6 +15,16 @@ export class LatinhasService {
     @InjectRepository(Demandas)
     private demandasRepository: Repository<Demandas>,
   ) {}
+
+  async findAllWithPagination(pagination: PaginationDTO): Promise<Latinhas[]> {
+    const { page, itemsPerPage } = pagination;
+    const skip = (page - 1) * itemsPerPage;
+
+    return await this.latinhasRepository.find({
+      skip,
+      take: itemsPerPage,
+    });
+  }
 
   async findAllByDemanda(demandaId: number): Promise<Latinhas[]> {
     const demanda = await this.demandasRepository.findOne({

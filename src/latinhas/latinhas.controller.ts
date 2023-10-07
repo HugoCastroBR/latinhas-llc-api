@@ -6,16 +6,23 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { LatinhasService } from './latinhas.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateLatinhasDTO } from './dto/create-latinhas.dto';
 import { UpdateLatinhasDTO } from './dto/update-latinhas.dto';
+import { PaginationDTO } from './dto/pagination.dto';
 
 @ApiTags('latinhas')
 @Controller('demandas/:demandaId/latinhas')
 export class LatinhasController {
   constructor(private readonly latinhasService: LatinhasService) {}
+
+  @Get()
+  findAll(@Query() pagination: PaginationDTO) {
+    return this.latinhasService.findAllWithPagination(pagination);
+  }
 
   @Post()
   create(
@@ -23,11 +30,6 @@ export class LatinhasController {
     @Body() createLatinhasDto: CreateLatinhasDTO,
   ) {
     return this.latinhasService.create(+demandaId, createLatinhasDto);
-  }
-
-  @Get()
-  findAll(@Param('demandaId') demandaId: string) {
-    return this.latinhasService.findAllByDemanda(+demandaId);
   }
 
   @Get(':id')
