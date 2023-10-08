@@ -20,6 +20,9 @@ export class Demandas {
   @Column()
   status: string;
 
-  @OneToMany(() => Latinhas, (latinhas) => latinhas.demanda)
+  @OneToMany(() => Latinhas, (latinhas) => latinhas.demanda, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   latinhas: Latinhas[];
 }

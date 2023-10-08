@@ -21,7 +21,15 @@ export class Latinhas {
   @Column()
   TotalPlan: number;
 
-  @ManyToOne(() => Latinhas, (latinhas) => latinhas.id)
+  @Column()
+  demandaId: number;
+
+  @ManyToOne(() => Latinhas, (latinhas) => latinhas.id, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    cascade: true,
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'demandaId' })
   demanda: Demandas;
 }

@@ -4,10 +4,11 @@ import { LatinhasController } from './latinhas.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Latinhas } from './entities/latinhas.entity';
 import { Demandas } from 'src/demandas/entities/demandas.entity';
+import { DemandasService } from 'src/demandas/demandas.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Latinhas, Demandas])], // Adicione a entidade "Demandas" aqui
   controllers: [LatinhasController],
-  providers: [LatinhasService],
+  providers: [LatinhasService, DemandasService],
 })
 export class LatinhasModule {}

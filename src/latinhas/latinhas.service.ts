@@ -26,17 +26,35 @@ export class LatinhasService {
     });
   }
 
-  async findAllByDemanda(demandaId: number): Promise<Latinhas[]> {
+  async findAllByDemanda(
+    demandaId: number,
+    pagination: PaginationDTO,
+  ): Promise<any> {
+    const { page, itemsPerPage } = pagination;
+    const skip = (page - 1) * itemsPerPage;
+
     const demanda = await this.demandasRepository.findOne({
       where: { id: demandaId },
       relations: ['latinhas'],
     });
+
     if (!demanda) {
       throw new NotFoundException(
         `Demanda com ID ${demandaId} não encontrada.`,
       );
     }
-    return demanda.latinhas;
+
+    const latinhas = demanda.latinhas.slice(skip, skip + itemsPerPage);
+
+    const totalLatinhas = demanda.latinhas.length;
+    const totalPages = Math.ceil(totalLatinhas / itemsPerPage);
+
+    return {
+      latinhas: latinhas,
+      total: totalLatinhas,
+      page: page,
+      totalPages: totalPages,
+    };
   }
 
   async findOne(demandaId: number, latinhaId: number): Promise<Latinhas> {
@@ -75,7 +93,7 @@ export class LatinhasService {
     latinha.Sku = createLatinhasDTO.Sku;
     latinha.descricao = createLatinhasDTO.descricao;
     latinha.TotalPlan = createLatinhasDTO.TotalPlan;
-    latinha.demanda = demanda;
+    latinha.demandaId = demandaId;
 
     return await this.latinhasRepository.save(latinha);
   }

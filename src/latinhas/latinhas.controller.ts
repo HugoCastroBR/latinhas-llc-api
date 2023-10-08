@@ -13,23 +13,40 @@ import { ApiTags } from '@nestjs/swagger';
 import { CreateLatinhasDTO } from './dto/create-latinhas.dto';
 import { UpdateLatinhasDTO } from './dto/update-latinhas.dto';
 import { PaginationDTO } from './dto/pagination.dto';
+import { DemandasService } from 'src/demandas/demandas.service';
 
 @ApiTags('latinhas')
 @Controller('demandas/:demandaId/latinhas')
 export class LatinhasController {
-  constructor(private readonly latinhasService: LatinhasService) {}
+  constructor(
+    private readonly demandasService: DemandasService,
+    private readonly latinhasService: LatinhasService,
+  ) {}
 
   @Get()
-  findAll(@Query() pagination: PaginationDTO) {
-    return this.latinhasService.findAllWithPagination(pagination);
+  findAll(
+    @Param('demandaId') demandaId: string,
+    @Query() pagination: PaginationDTO,
+  ) {
+    return this.latinhasService.findAllByDemanda(+demandaId, pagination);
   }
 
   @Post()
-  create(
-    @Param('demandaId') demandaId: string,
-    @Body() createLatinhasDto: CreateLatinhasDTO,
+  async create(
+    @Param('demandaId') demandaId: number,
+    @Body() createLatinhaDTO: CreateLatinhasDTO,
   ) {
-    return this.latinhasService.create(+demandaId, createLatinhasDto);
+    const latinha = await this.latinhasService.create(
+      demandaId,
+      createLatinhaDTO,
+    );
+
+    if (latinha) {
+      await this.demandasService.updateTotalPlan(demandaId, latinha.TotalPlan);
+      await this.demandasService.updateDemandStatus(demandaId);
+    }
+
+    return latinha;
   }
 
   @Get(':id')
