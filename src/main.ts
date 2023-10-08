@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  console.log('process.env.DB_TYPE', process.env.DB_TYPE);
+  ;
 
   const app = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()

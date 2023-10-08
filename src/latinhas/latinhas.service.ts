@@ -141,6 +141,7 @@ export class LatinhasService {
       where: { id: demandaId },
       relations: ['latinhas'],
     });
+
     if (!demanda) {
       throw new NotFoundException(
         `Demanda com ID ${demandaId} não encontrada.`,
@@ -148,12 +149,16 @@ export class LatinhasService {
     }
 
     const latinha = demanda.latinhas.find((l) => l.id === latinhaId);
+
     if (!latinha) {
       throw new NotFoundException(
         `Latina com ID ${latinhaId} não encontrada na demanda.`,
       );
     }
 
+    demanda.totalPlan -= latinha.TotalPlan;
+    demanda.latinhas = demanda.latinhas.filter((l) => l.id !== latinhaId);
     await this.latinhasRepository.remove(latinha);
+    await this.demandasRepository.save(demanda);
   }
 }
